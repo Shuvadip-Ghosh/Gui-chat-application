@@ -45,7 +45,7 @@ def receive():
         client.send('Connected to chat!\n'.encode('utf-8'))
         print("confirmed")
         broadcast(f"{nickname} joined! the chat \n".encode('utf-8'))
-       
+      
         nicknames.append(nickname)
         clients.append(client)
 
