@@ -2,7 +2,7 @@ import socket
 import threading
 import tkinter
 from tkinter import scrolledtext
-from tkinter import simpledialog,Frame,Text
+from tkinter import simpledialog,Frame,Text,PhotoImage
 import os
 import time
 import sys
@@ -74,18 +74,24 @@ class Client:
         self.msglabel.configure(font=("Arial",12))
         self.msglabel.pack(padx=20, pady=5)
 
-        self.inputarea = tkinter.Text(self.win, height=3,bg="black", fg="white")
-        self.inputarea.pack(padx=20, pady=5)
+        self.input_frame = Frame(self.win, bg="black")
+        self.input_frame.pack(padx=20,pady=5)
 
-        self.sendbutton= tkinter.Button(self.win, text="send",bg="black", fg="white",command=self.write)
+        self.inputarea = tkinter.Text(self.input_frame, height=3,bg="black", fg="white",width=72)
+        self.inputarea.pack(padx=20, pady=5,side="left")
+
+        self.send_img= PhotoImage(file="images/send.png")
+        self.sendbutton= tkinter.Button(self.input_frame,borderwidth=0, image=self.send_img ,bg="black", fg="white",command=self.write)
         self.sendbutton.config(font=("Arial",12))
-        self.sendbutton.pack(padx=20,pady=5)
-                        
-        self.gui_done = True
+        self.sendbutton.pack(padx=20,pady=5,side="left")
 
-        self.win.protocol("WN_DELETE_WINDOW", self.stop)
-        self.win.mainloop()      
-     
+        self.gui_done = True
+        self.win.mainloop()
+        self.running = False
+        self.sock.close()
+        self.win.destroy()
+        self.sock.close()
+        self.win.destroy()
 
     def write(self):
         input_area = self.inputarea.get('1.0','end')
@@ -97,12 +103,6 @@ class Client:
         else:
             pass
     
-    def stop(self):
-        self.running = False
-        self.win.destroy()
-        self.sock.close()
-        print("stopped")
-        sys.exit()
     def person_updater(self,message):
         if self.gui_done:
             self.person_l.config(height=len(message),state="normal")
@@ -120,7 +120,6 @@ class Client:
                         message = message.replace("list [","")
                         message = "["+message
                         message = eval(message)
-                        print(message)
                         self.person_updater(message)
                     else:
                         self.textarea.config(state='normal')
@@ -132,7 +131,6 @@ class Client:
             except:
                 print('error')
                 self.sock.close()
-                sys.exit()
                 break
 
-client = Client(host=host,port=port)
+client = Client(host=host,port=port) 

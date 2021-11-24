@@ -20,8 +20,8 @@ def handle(client):
         try:
             # Broadcasting Messages
             message = client.recv(1024)
-            print(message.decode('utf-8'))
             broadcast(message)
+            print(message.decode('utf-8').replace("\n",""))
         except:
             # Removing And Closing Clients
             index = clients.index(client)
@@ -32,7 +32,6 @@ def handle(client):
             print("{} left the chat".format(nickname))
             nick = "list "+str(nicknames)
             broadcast(nick.encode('utf-8'))
-            print(f"{nick}\nsent")
             break
 def receive():
     while True:
@@ -42,17 +41,14 @@ def receive():
 
         # Request And Store Nickname
         client.send('NICK'.encode('utf-8'))
-        print("asked nickname")
         nickname = client.recv(1024).decode('utf-8')
-
         nicknames.append(nickname)
         clients.append(client)
-
         print("Nickname is {}".format(nickname))
         nick = "list "+str(nicknames)
         client.send(nick.encode('utf-8'))
+        print(nick)
         broadcast(nick.encode('utf-8'))
-        print(f"{nick}\nsent")
 
         thread = threading.Thread(target=handle, args=(client,))
         thread.start()
