@@ -1,5 +1,8 @@
 import socket
 import threading
+
+from database import get
+
 host = '127.0.0.1'
 port = 9090
 
@@ -20,8 +23,9 @@ def handle(client):
         try:
             # Broadcasting Messages
             message = client.recv(1024)
+            from database import add
+            add(message.decode('utf-8').replace("\n",""))
             broadcast(message)
-            print(message.decode('utf-8').replace("\n",""))
         except:
             # Removing And Closing Clients
             index = clients.index(client)
@@ -45,11 +49,17 @@ def receive():
         nicknames.append(nickname)
         clients.append(client)
         print("Nickname is {}".format(nickname))
+        
         nick = "list "+str(nicknames)
         client.send(nick.encode('utf-8'))
+        
+        from database import get
+        res = get()
+        premsg = "premsg "+str(res)
         print(nick)
         broadcast(nick.encode('utf-8'))
-
+        client.send(premsg.encode('utf-8'))
+        
         thread = threading.Thread(target=handle, args=(client,))
         thread.start()
 

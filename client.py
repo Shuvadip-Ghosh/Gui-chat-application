@@ -33,19 +33,25 @@ class Client:
         
         persons = self.sock.recv(10240)
         persons = persons.decode('utf-8')
-        persons = persons.replace("list ","")
+        persons = persons[4:]
         persons = eval(persons)
- 
+
+        self.premsg = self.sock.recv(65535)
+        self.premsg = self.premsg.decode('utf-8')
+        self.premsg = self.premsg[6:]
+        self.premsg = eval(self.premsg)
+
         gui_thread = threading.Thread(target=self.gui_loop)
+        previous_ms = threading.Thread(target=self.prevoius_msg)
         receive_thread = threading.Thread(target=self.receive)
         
         self.running = True
         gui_thread.start()
         time.sleep(1)
         self.person_updater(persons)
-        
+        previous_ms.start()
         receive_thread.start()
-                                                      
+
     def gui_loop(self):
         self.win = tkinter.Tk()
         self.win.configure(bg="black")
@@ -102,7 +108,20 @@ class Client:
             self.inputarea.delete('1.0','end')
         else:
             pass
-    
+    def prevoius_msg(self):
+        while True:
+            if self.gui_done:
+                try:
+                    for msg in self.premsg:
+                        message = msg[0]+':'+msg[1]+'\n'
+                        self.textarea.config(state='normal')
+                        self.textarea.insert('end',message)
+                        self.textarea.yview('end')
+                        self.textarea.config(state='disabled')
+                    self.premsg= []
+                except Exception as e:
+                    print(e)
+                break
     def person_updater(self,message):
         if self.gui_done:
             self.person_l.config(height=len(message),state="normal")
@@ -117,8 +136,7 @@ class Client:
                 message = message.decode('utf-8')
                 if self.gui_done:
                     if message.startswith("list ["):
-                        message = message.replace("list [","")
-                        message = "["+message
+                        message = message[4:]
                         message = eval(message)
                         self.person_updater(message)
                     else:
@@ -133,4 +151,4 @@ class Client:
                 self.sock.close()
                 break
 
-client = Client(host=host,port=port) 
+client = Client(host=host,port=port)
