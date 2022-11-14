@@ -12,6 +12,7 @@ port = 9090
 class Client:
     def __init__(self,host,port) :
         self.persons = []
+        # self.nickname = "Shuvadip Ghosh"
         file = open('username.txt','r')
         content = file.read()
         file.close()
@@ -125,8 +126,10 @@ class Client:
     def person_updater(self,message):
         if self.gui_done:
             self.person_l.config(height=len(message),state="normal")
+            self.person_l.delete('1.0','end')
             for mess in message:
                 mess = mess+"\n"
+                # print(mess)
                 self.person_l.insert('end',mess)
             self.person_l.config(state="disabled")
     def receive(self):

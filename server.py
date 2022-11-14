@@ -51,13 +51,13 @@ def receive():
         print("Nickname is {}".format(nickname))
         
         nick = "list "+str(nicknames)
-        client.send(nick.encode('utf-8'))
-        
+        broadcast(nick.encode('utf-8'))
         from database import get
         res = get()
         premsg = "premsg "+str(res)
-        print(nick)
-        broadcast(nick.encode('utf-8'))
+        # print(premsg)
+        # print(nick)
+        
         client.send(premsg.encode('utf-8'))
         
         thread = threading.Thread(target=handle, args=(client,))

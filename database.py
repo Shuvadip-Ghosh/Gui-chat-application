@@ -27,6 +27,6 @@ def get():
     Connection.commit()
     return res
 
-# create()
+create()
 # add("Shuvadip Ghosh: hello")
 # get()
