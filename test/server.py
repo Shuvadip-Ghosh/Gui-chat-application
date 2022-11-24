@@ -1,32 +1,28 @@
-import socket
 import threading
+import socket
+# Connection Data
+host = 'localhost'
+port = 9999
 
-from database import get
-
-# host = '10.0.0.5'
-# host = '127.0.0.1'
-host= 'localhost'
-port= 9090
-
+# Starting Server
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind((host,port))
+server.bind((host, port))
 server.listen()
+
+# Lists For Clients and Their Nicknames
 clients = []
 nicknames = []
 
-
+# Sending Messages To All Connected Clients
 def broadcast(message):
     for client in clients:
         client.send(message)
-
 
 def handle(client):
     while True:
         try:
             # Broadcasting Messages
             message = client.recv(1024)
-            from database import add
-            add(message.decode('utf-8').replace("\n",""))
             broadcast(message)
         except:
             # Removing And Closing Clients
@@ -34,10 +30,8 @@ def handle(client):
             clients.remove(client)
             client.close()
             nickname = nicknames[index]
+            broadcast('{} left!'.format(nickname).encode('ascii'))
             nicknames.remove(nickname)
-            print("{} left the chat".format(nickname))
-            nick = "list "+str(nicknames)
-            broadcast(nick.encode('utf-8'))
             break
 def receive():
     while True:
@@ -46,25 +40,17 @@ def receive():
         print("Connected with {}".format(str(address)))
 
         # Request And Store Nickname
-        client.send('NICK'.encode('utf-8'))
-        nickname = client.recv(1024).decode('utf-8')
+        client.send('NICK'.encode('ascii'))
+        nickname = client.recv(1024).decode('ascii')
         nicknames.append(nickname)
         clients.append(client)
+
+        # Print And Broadcast Nickname
         print("Nickname is {}".format(nickname))
-        
-        nick = "list "+str(nicknames)
-        broadcast(nick.encode('utf-8'))
-        from database import get
-        res = get()
-        premsg = "premsg "+str(res)
-        print(premsg)
-        print(nick)
-        
-        client.send(premsg.encode('utf-8'))
-        
+        broadcast("{} joined!".format(nickname).encode('ascii'))
+        client.send('Connected to server!'.encode('ascii'))
+
+        # Start Handling Thread For Client
         thread = threading.Thread(target=handle, args=(client,))
         thread.start()
-
-
 receive()
-

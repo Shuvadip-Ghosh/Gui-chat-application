@@ -14,12 +14,13 @@ def add(name_message):
     message = name_message[(len(name)+1):]
     # print(f"{name}")
     # print(f"{message}")
-    try:
-        cursor.execute(f"""INSERT INTO messages (Name,recv_message)VALUES 
-        ('{name}', '{message}')""")
-        Connection.commit()
-    except Exception as e:
-        print(e)
+    if name != "" and message != "":
+        try:
+            cursor.execute(f"""INSERT INTO messages (Name,recv_message)VALUES 
+            ('{name}', '{message}')""")
+            Connection.commit()
+        except Exception as e:
+            print(e)
 
 def get():
     cursor.execute("SELECT * FROM messages;")
