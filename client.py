@@ -5,6 +5,7 @@ from tkinter import scrolledtext
 from tkinter import simpledialog,Frame,Text,PhotoImage
 import customtkinter
 import time
+from data import get_credentials,get_Theme 
 # host = '10.0.0.5'
 host = 'localhost'
 # host = '127.0.0.1'
@@ -14,53 +15,37 @@ port = 9090
 class Client:
     def __init__(self,host,port) :
         self.persons = []
-        
-
         # self.nickname = "Shuvadip Ghosh"
-        file_name = "username.txt"
-        # files = os.listdir()
-        # if files.count(file_name) ==0:
-        #     file = open(file_name,'w')
-        #     file.close()
-        # files.clear()
-
-        file = open(file_name,'r')
+        file = open('username.txt','r')
         content = file.read()
         file.close()
         if content == "":
             msg = tkinter.Tk()
             msg.withdraw()
             self.nickname = simpledialog.askstring("Nickname", "Please enter a Nickname", parent=msg)
-            file = open(file_name,'w')
+            file = open('username.txt','w')
             file.write(self.nickname)
             file.close()
         else:
             self.nickname = content
-        
-
         self.gui_done = False
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((host,port))
         time.sleep(0.5)
         message = self.sock.recv(1024)    
-        self.sock.send(self.nickname.encode('utf-8'))
-        print("sent")
+        self.sock.send(self.nickname.encode('utf-8')) 
         
         persons = self.sock.recv(10240)
         persons = persons.decode('utf-8')
         persons = persons[4:]
-        print("here"+persons)
         persons = eval(persons)
 
         self.premsg = self.sock.recv(65535)
         self.premsg = self.premsg.decode('utf-8')
         self.premsg = self.premsg[6:]
-        print("here"+self.premsg)
         self.premsg = eval(self.premsg)
-        # print(persons)
-        # print(self.premsg)
 
-        gui_thread = threading.Thread(target=self.gui_loop,daemon=True)
+        gui_thread = threading.Thread(target=self.gui_loop)
         previous_ms = threading.Thread(target=self.prevoius_msg)
         receive_thread = threading.Thread(target=self.receive)
         
@@ -72,6 +57,8 @@ class Client:
         receive_thread.start()
 
     def gui_loop(self):
+        customtkinter.set_appearance_mode("dark")
+        customtkinter.set_default_color_theme("dark-blue")
         self.app = customtkinter.CTk()
         self.app.geometry("1000x520")
         
@@ -120,7 +107,8 @@ class Client:
         self.gui_done = True
         self.app.mainloop()
         self.running = False
-        self.sock.close()
+        if self.net:
+            self.sock.close()
     def write(self):
         data = self.msg_box.get()
         if len(data.replace(" ","")) !=0:
@@ -128,6 +116,9 @@ class Client:
             self.msg_box.delete(0,tkinter.END)
             self.msg_box.deactivate_placeholder()
             self.sock.send(message.encode('utf-8'))
+        else:
+            self.msg_box.delete(0,tkinter.END)
+            self.msg_box.deactivate_placeholder()
     def prevoius_msg(self):
         while True:
             if self.gui_done:
