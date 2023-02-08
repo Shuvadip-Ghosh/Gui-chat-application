@@ -6,9 +6,8 @@ from tkinter import simpledialog,Frame,Text,PhotoImage
 import customtkinter
 import time
 from data import get_credentials,get_Theme 
-# host = '10.0.0.5'
+
 host = 'localhost'
-# host = '127.0.0.1'
 port = 9090
 # host = "0.tcp.in.ngrok.io"
 # port = 16976
@@ -28,6 +27,8 @@ class Client:
             file.close()
         else:
             self.nickname = content
+        
+        
         self.gui_done = False
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((host,port))
@@ -57,7 +58,7 @@ class Client:
         receive_thread.start()
 
     def gui_loop(self):
-        customtkinter.set_appearance_mode("dark")
+        customtkinter.set_appearance_mode(get_Theme())
         customtkinter.set_default_color_theme("dark-blue")
         self.app = customtkinter.CTk()
         self.app.geometry("1000x520")
